@@ -1,0 +1,132 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Een NETGEAR-switch toevoegen",
+        "description": "Een NETGEAR Plus-switch (smart managed), zoals een GS105E, GS108E of GS308EP. De integratie logt in op de webinterface; het model wordt vanzelf gevonden.",
+        "data": {
+          "host": "Host",
+          "password": "Wachtwoord"
+        },
+        "data_description": {
+          "host": "Het adres van de switch. Geef hem een vast adres, in je router of op de switch.",
+          "password": "Het wachtwoord van de webinterface van de switch."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Opnieuw inloggen",
+        "description": "De switch op {host} weigert het wachtwoord.",
+        "data": {
+          "password": "Wachtwoord"
+        },
+        "data_description": {
+          "password": "Het wachtwoord van de webinterface van de switch."
+        }
+      },
+      "reconfigure": {
+        "title": "Adres en wachtwoord",
+        "description": "Voor als de switch een ander adres of een ander wachtwoord heeft gekregen.",
+        "data": {
+          "host": "Host",
+          "password": "Wachtwoord"
+        },
+        "data_description": {
+          "host": "Het adres van de switch.",
+          "password": "Het wachtwoord van de webinterface van de switch."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Op dit adres antwoordt geen ondersteunde switch ({reason}). Klopt het adres, en kan Home Assistant bij de webinterface van de switch?",
+      "invalid_auth": "De switch weigert de login. Het wachtwoord klopt niet, of de switch heeft geen vrije inlogsessie: log uit bij de webinterface in je browser en probeer het opnieuw.",
+      "unknown": "Onverwachte fout: {reason}. Zie het logboek van Home Assistant."
+    },
+    "abort": {
+      "already_configured": "Deze switch is al toegevoegd.",
+      "reauth_successful": "Opnieuw ingelogd.",
+      "reconfigure_successful": "Opgeslagen.",
+      "another_switch": "Dat is een andere switch. Voeg die toe als nieuwe."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "port": {
+        "name": "Poort {port}"
+      },
+      "poe_delivering": {
+        "name": "Poort {port} PoE levert stroom"
+      }
+    },
+    "button": {
+      "poe_power_cycle": {
+        "name": "Poort {port} PoE uit en aan"
+      }
+    },
+    "sensor": {
+      "rx": {
+        "name": "In"
+      },
+      "tx": {
+        "name": "Uit"
+      },
+      "crc_errors": {
+        "name": "CRC-fouten"
+      },
+      "port_rx": {
+        "name": "Poort {port} in"
+      },
+      "port_tx": {
+        "name": "Poort {port} uit"
+      },
+      "port_total_rx": {
+        "name": "Poort {port} totaal in"
+      },
+      "port_total_tx": {
+        "name": "Poort {port} totaal uit"
+      },
+      "port_link_speed": {
+        "name": "Poort {port} linksnelheid"
+      },
+      "poe_power": {
+        "name": "Poort {port} PoE-vermogen"
+      },
+      "poe_status": {
+        "name": "Poort {port} PoE-status"
+      },
+      "poe_voltage": {
+        "name": "Poort {port} PoE-spanning"
+      },
+      "poe_current": {
+        "name": "Poort {port} PoE-stroom"
+      },
+      "poe_temperature": {
+        "name": "Poort {port} PoE-temperatuur"
+      },
+      "poe_class": {
+        "name": "Poort {port} PoE-klasse"
+      },
+      "poe_fault": {
+        "name": "Poort {port} PoE-fout"
+      }
+    },
+    "switch": {
+      "poe": {
+        "name": "Poort {port} PoE"
+      },
+      "port_enabled": {
+        "name": "Poort {port} ingeschakeld"
+      },
+      "leds": {
+        "name": "Leds op de voorkant"
+      }
+    }
+  },
+  "exceptions": {
+    "command_error": {
+      "message": "De switch op {host} nam de opdracht niet aan: {reason}"
+    },
+    "command_refused": {
+      "message": "De switch op {host} weigerde de opdracht."
+    }
+  }
+}

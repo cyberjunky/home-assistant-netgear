@@ -1,0 +1,132 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a NETGEAR switch",
+        "description": "A NETGEAR Plus (smart managed) switch, such as a GS105E, GS108E or GS308EP. The integration logs in to its web interface; the model is found by itself.",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "The address of the switch. Give it a fixed address, in your router or on the switch.",
+          "password": "The password of the switch's web interface."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Log in again",
+        "description": "The switch at {host} refuses the password.",
+        "data": {
+          "password": "Password"
+        },
+        "data_description": {
+          "password": "The password of the switch's web interface."
+        }
+      },
+      "reconfigure": {
+        "title": "Address and password",
+        "description": "For when the switch got another address or another password.",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "The address of the switch.",
+          "password": "The password of the switch's web interface."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "No supported switch answers at this address ({reason}). Is the address right, and can Home Assistant reach the switch's web interface?",
+      "invalid_auth": "The switch refuses the login. The password is wrong, or the switch has no free login session: log out of its web interface in your browser and try again.",
+      "unknown": "Unexpected error: {reason}. See the Home Assistant log."
+    },
+    "abort": {
+      "already_configured": "This switch is added already.",
+      "reauth_successful": "Logged in again.",
+      "reconfigure_successful": "Saved.",
+      "another_switch": "That is another switch. Add it as a new one instead."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "port": {
+        "name": "Port {port}"
+      },
+      "poe_delivering": {
+        "name": "Port {port} PoE delivering"
+      }
+    },
+    "button": {
+      "poe_power_cycle": {
+        "name": "Port {port} PoE power cycle"
+      }
+    },
+    "sensor": {
+      "rx": {
+        "name": "In"
+      },
+      "tx": {
+        "name": "Out"
+      },
+      "crc_errors": {
+        "name": "CRC errors"
+      },
+      "port_rx": {
+        "name": "Port {port} in"
+      },
+      "port_tx": {
+        "name": "Port {port} out"
+      },
+      "port_total_rx": {
+        "name": "Port {port} total in"
+      },
+      "port_total_tx": {
+        "name": "Port {port} total out"
+      },
+      "port_link_speed": {
+        "name": "Port {port} link speed"
+      },
+      "poe_power": {
+        "name": "Port {port} PoE power"
+      },
+      "poe_status": {
+        "name": "Port {port} PoE status"
+      },
+      "poe_voltage": {
+        "name": "Port {port} PoE voltage"
+      },
+      "poe_current": {
+        "name": "Port {port} PoE current"
+      },
+      "poe_temperature": {
+        "name": "Port {port} PoE temperature"
+      },
+      "poe_class": {
+        "name": "Port {port} PoE class"
+      },
+      "poe_fault": {
+        "name": "Port {port} PoE fault"
+      }
+    },
+    "switch": {
+      "poe": {
+        "name": "Port {port} PoE"
+      },
+      "port_enabled": {
+        "name": "Port {port} enabled"
+      },
+      "leds": {
+        "name": "Front panel LEDs"
+      }
+    }
+  },
+  "exceptions": {
+    "command_error": {
+      "message": "The switch at {host} did not take the command: {reason}"
+    },
+    "command_refused": {
+      "message": "The switch at {host} refused the command."
+    }
+  }
+}

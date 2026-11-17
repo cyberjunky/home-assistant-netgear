@@ -1,0 +1,14 @@
+{
+  "domain": "netgear_switch",
+  "name": "NETGEAR Switch",
+  "codeowners": ["@cyberjunky"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/cyberjunky/home-assistant-netgear",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/cyberjunky/home-assistant-netgear/issues",
+  "loggers": ["py_netgear_plus"],
+  "requirements": ["py-netgear-plus==0.7.0"],
+  "version": "0.1.0"
+}

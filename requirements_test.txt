@@ -1,0 +1,4 @@
+py-netgear-plus==0.7.0
+pytest-homeassistant-custom-component
+pytest-asyncio
+pytest-cov

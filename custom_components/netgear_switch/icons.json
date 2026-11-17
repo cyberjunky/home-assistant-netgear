@@ -1,0 +1,58 @@
+{
+  "entity": {
+    "sensor": {
+      "rx": {
+        "default": "mdi:download-network"
+      },
+      "tx": {
+        "default": "mdi:upload-network"
+      },
+      "crc_errors": {
+        "default": "mdi:alert-circle-outline"
+      },
+      "port_rx": {
+        "default": "mdi:download-network"
+      },
+      "port_tx": {
+        "default": "mdi:upload-network"
+      },
+      "port_total_rx": {
+        "default": "mdi:download"
+      },
+      "port_total_tx": {
+        "default": "mdi:upload"
+      },
+      "port_link_speed": {
+        "default": "mdi:speedometer"
+      },
+      "poe_status": {
+        "default": "mdi:power-plug"
+      },
+      "poe_class": {
+        "default": "mdi:numeric"
+      },
+      "poe_fault": {
+        "default": "mdi:alert-outline"
+      }
+    },
+    "switch": {
+      "leds": {
+        "default": "mdi:led-on",
+        "state": {
+          "off": "mdi:led-off"
+        }
+      },
+      "port_enabled": {
+        "default": "mdi:ethernet",
+        "state": {
+          "off": "mdi:ethernet-off"
+        }
+      }
+    },
+    "button": {
+      "poe_power_cycle": {
+        "default": "mdi:power-cycle"
+      }
+    }
+  }
+}
