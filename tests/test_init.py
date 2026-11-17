@@ -47,7 +47,8 @@ def state(hass: HomeAssistant, platform: str, serial: str, key: str):
 async def next_read(hass: HomeAssistant, freezer) -> None:
     freezer.tick(timedelta(seconds=31))
     async_fire_time_changed(hass)
-    await hass.async_block_till_done()
+    # The timed read is a background task
+    await hass.async_block_till_done(wait_background_tasks=True)
 
 
 async def test_the_switch_as_a_device(hass: HomeAssistant, gs105) -> None:
