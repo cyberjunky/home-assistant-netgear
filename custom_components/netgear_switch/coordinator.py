@@ -9,10 +9,10 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Final
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST
+from homeassistant.const import CONF_HOST, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -31,6 +31,11 @@ from py_netgear_plus import (
 from .const import DOMAIN, SCAN_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
+
+# The switch ends a login session now and then, and can refuse a new login for a while (it has only
+# a few sessions, and the library reports that the same way as a wrong password). So a refused login
+# is tried again with every read, and the password is asked for only after this many in a row.
+ASK_PASSWORD_AFTER: Final = 10
 
 type NetgearConfigEntry = ConfigEntry[NetgearCoordinator]
 
@@ -85,6 +90,7 @@ class NetgearCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.host: str = entry.data[CONF_HOST]
         self.unique_id: str = entry.unique_id or entry.entry_id
         self._lock = asyncio.Lock()
+        self._refused = 0
 
     @property
     def model(self) -> Any:
@@ -99,14 +105,34 @@ class NetgearCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     def poe_ports(self) -> list[int]:
         return list(self.api.poe_ports or [])
 
+    def _read(self) -> dict[str, Any]:
+        """Read the switch; when it no longer accepts our session, log in anew and read again. Blocking."""
+        try:
+            return self.api.get_switch_infos()
+        except LoginFailedError as err:
+            _LOGGER.debug("%s ended the session (%s), logging in again", self.host, err)
+        try:
+            self.api.delete_login_cookie()
+        except (LoginFailedError, *READ_ERRORS) as err:
+            _LOGGER.debug("Logging out of %s failed: %s", self.host, err)
+        self.api = connect(self.host, self.config_entry.data[CONF_PASSWORD])
+        return self.api.get_switch_infos()
+
     async def _async_update_data(self) -> dict[str, Any]:
         async with self._lock:
             try:
-                return await self.hass.async_add_executor_job(self.api.get_switch_infos)
-            except LoginFailedError as err:
-                raise ConfigEntryAuthFailed(str(err)) from err
-            except READ_ERRORS as err:
+                data = await self.hass.async_add_executor_job(self._read)
+            except (InvalidAuthError, LoginFailedError) as err:
+                self._refused += 1
+                if self._refused >= ASK_PASSWORD_AFTER:
+                    raise ConfigEntryAuthFailed(str(err)) from err
+                raise UpdateFailed(
+                    f"{self.host} refuses the login ({self._refused} in a row), trying again: {err}"
+                ) from err
+            except (CannotConnectError, *READ_ERRORS) as err:
                 raise UpdateFailed(f"{self.host}: {err or type(err).__name__}") from err
+        self._refused = 0
+        return data
 
     async def async_command(self, command: Callable[..., bool], *args: Any) -> None:
         """Send the switch a command, and read it again."""

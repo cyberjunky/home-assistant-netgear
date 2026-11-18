@@ -11,9 +11,10 @@ from homeassistant.helpers import entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 
 from custom_components.netgear_switch.const import DOMAIN
+from custom_components.netgear_switch.coordinator import ASK_PASSWORD_AFTER
 from custom_components.netgear_switch.diagnostics import async_get_config_entry_diagnostics
 
-from .conftest import GS105, GS105_SERIAL, GS308, GS308_SERIAL, PASSWORD, LoginFailedError, PageFetcherConnectionError
+from .conftest import GS105, GS105_SERIAL, GS308, GS308_SERIAL, PASSWORD, PageFetcherConnectionError
 
 
 async def add(hass: HomeAssistant, host: str, serial: str) -> MockConfigEntry:
@@ -165,9 +166,42 @@ async def test_no_answer_makes_the_entities_unavailable(hass: HomeAssistant, gs1
     assert state(hass, "binary_sensor", GS105_SERIAL, "port_1_link").state == "on"
 
 
-async def test_a_refused_login_asks_for_the_password(hass: HomeAssistant, gs105, fake_switch, freezer) -> None:
-    fake_switch.failing[GS105] = LoginFailedError
+def end_session(fake_switch, host: str) -> None:
+    """The switch forgets the sessions made so far, and for now refuses new logins."""
+    fake_switch.session_ended[host] = fake_switch.logins
+    fake_switch.refusing.add(host)
+
+
+async def test_an_ended_session_logs_in_again(hass: HomeAssistant, gs105, fake_switch, freezer) -> None:
+    fake_switch.session_ended[GS105] = fake_switch.logins
     await next_read(hass, freezer)
+    assert state(hass, "binary_sensor", GS105_SERIAL, "port_1_link").state == "on"
+    assert hass.config_entries.flow.async_progress_by_handler(DOMAIN) == []
+    # The ended session was logged out of, in case the switch still counted it
+    assert fake_switch.logged_out == [GS105]
+
+
+async def test_a_login_refused_for_a_while_is_tried_again(hass: HomeAssistant, gs105, fake_switch, freezer) -> None:
+    end_session(fake_switch, GS105)
+    for _ in range(ASK_PASSWORD_AFTER - 1):
+        await next_read(hass, freezer)
+    assert state(hass, "binary_sensor", GS105_SERIAL, "port_1_link").state == "unavailable"
+    assert hass.config_entries.flow.async_progress_by_handler(DOMAIN) == []
+    fake_switch.refusing.clear()
+    await next_read(hass, freezer)
+    assert state(hass, "binary_sensor", GS105_SERIAL, "port_1_link").state == "on"
+    # The count starts over: the next refusal doesn't ask for the password either
+    end_session(fake_switch, GS105)
+    await next_read(hass, freezer)
+    assert hass.config_entries.flow.async_progress_by_handler(DOMAIN) == []
+
+
+async def test_a_login_that_stays_refused_asks_for_the_password(
+    hass: HomeAssistant, gs105, fake_switch, freezer
+) -> None:
+    end_session(fake_switch, GS105)
+    for _ in range(ASK_PASSWORD_AFTER):
+        await next_read(hass, freezer)
     flows = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
     assert [f["context"]["source"] for f in flows] == [SOURCE_REAUTH]
 

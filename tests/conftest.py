@@ -120,8 +120,15 @@ class FakeSwitch:
     command_result = True
     commands: list[tuple[Any, ...]] = []
     logged_out: list[str] = []
+    # Per host: the switch ended the sessions made up to this login; a new login works again
+    session_ended: dict[str, int] = {}
+    # Hosts whose switch refuses every login, as with a wrong password or no free session
+    refusing: set[str] = set()
+    logins = 0
 
     def __init__(self, host: str, password: str) -> None:
+        FakeSwitch.logins += 1
+        self.number = FakeSwitch.logins
         self.host = host
         self._password = password
         self.switch_model: Any = models.AutodetectedSwitchModel
@@ -141,7 +148,7 @@ class FakeSwitch:
         return self.switch_model
 
     def get_login_cookie(self) -> bool:
-        return self._password == PASSWORD
+        return self._password == PASSWORD and self.host not in self.refusing
 
     def delete_login_cookie(self) -> bool:
         self.logged_out.append(self.host)
@@ -153,6 +160,8 @@ class FakeSwitch:
     def get_switch_infos(self) -> dict[str, Any]:
         if error := self.failing.get(self.host):
             raise error("no answer")
+        if self.number <= self.session_ended.get(self.host, 0):
+            raise LoginFailedError("Too many authentication failures (3).")
         return {**self._data, "switch_ip": self.host}
 
     def _command(self, name: str, *args: Any, **changes: Any) -> bool:
@@ -198,6 +207,9 @@ def fake_switch():
     FakeSwitch.command_result = True
     FakeSwitch.commands = []
     FakeSwitch.logged_out = []
+    FakeSwitch.session_ended = {}
+    FakeSwitch.refusing = set()
+    FakeSwitch.logins = 0
     with patch("custom_components.netgear_switch.coordinator.NetgearSwitchConnector", FakeSwitch):
         yield FakeSwitch
 
